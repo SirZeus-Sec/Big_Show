@@ -1,0 +1,31 @@
+name: Secret Scan with TruffleHog
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  secret-scan:
+    name: Scan changed files for secrets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Fetch the last two commits to compare changes
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "$CHANGED_FILES"
+          echo "files=$CHANGED_FILES" >> $GITHUB_ENV
+
+      - name: Run TruffleHog on changed files
+        if: env.files != ''
+        run: |
+          for file in ${{ env.files }}; do
+            echo "Scanning $file..."
+            trufflehog filesystem --path "$file" --only-verified
+          done
