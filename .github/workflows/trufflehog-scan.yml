@@ -15,6 +15,9 @@ jobs:
         with:
           fetch-depth: 2 # Fetch the last two commits to compare changes
 
+      - name: Install TruffleHog
+        run: pip install trufflehog
+
       - name: Get changed files
         id: changed-files
         run: |
